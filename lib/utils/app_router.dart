@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,30 +16,74 @@ import '../screens/splash_screen.dart';
 import '../services/auth_service.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
+  final authState = ref.watch(authStateProvider); // Mengawasi status otentikasi dari authStateProvider
   
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/splash', // Aplikasi dimulai di SplashScreen
     redirect: (context, state) {
+      final currentPath = state.matchedLocation; // Mendapatkan path URL saat ini
+      final isLoggingInOrRegistering = currentPath == '/login' || currentPath == '/register';
+      final isSplashing = currentPath == '/splash';
+
+      // Jika saat ini berada di splash screen, JANGAN LAKUKAN REDIRECT di sini.
+      // Biarkan SplashScreen yang mengontrol navigasi setelah delay-nya.
+      if (isSplashing) {
+        print('Router Redirect: Currently on /splash, letting SplashScreen handle navigation.');
+        return null; 
+      }
+
+      // Debug prints (bisa dihapus nanti setelah selesai debugging)
+      print('Router Redirect: Current Path = $currentPath');
+      print('Router Redirect: Auth State = ${authState.runtimeType}');
+
+      // Logika redirect hanya untuk path SELAIN /splash
       return authState.when(
         data: (user) {
-          final isLoggedIn = user != null;
-          final currentPath = state.matchedLocation;
-          final isLoggingIn = currentPath == '/login' || currentPath == '/register';
-          
-          if (!isLoggedIn && !isLoggingIn && currentPath != '/splash') {
-            return '/login';
+          final isLoggedIn = user != null; // Cek apakah pengguna sudah login
+          print('Auth State Data: User Logged In = $isLoggedIn');
+
+          // Jika sudah login
+          if (isLoggedIn) {
+            // Jika mencoba akses login/register, arahkan ke home
+            if (isLoggingInOrRegistering) {
+              print('Redirecting to /home because user is logged in and trying to access login/register.');
+              return '/home';
+            }
+            // Jika tidak, biarkan akses ke path yang dituju
+            print('Allowing access to current path: $currentPath');
+            return null;
           }
-          if (isLoggedIn && isLoggingIn) {
-            return '/home';
+          // Jika BELUM login
+          else {
+            // Jika mencoba akses path yang dilindungi (bukan login/register), arahkan ke login
+            if (!isLoggingInOrRegistering) {
+              print('Redirecting to /login because user is not logged in and path is protected: $currentPath');
+              return '/login';
+            }
+            // Jika sudah di login/register, biarkan akses.
+            print('Allowing access to login/register because user is not logged in.');
+            return null;
           }
-          return null;
         },
-        loading: () => '/splash',
-        error: (_, __) => '/login',
+        loading: () {
+          // Selama authState loading (dan kita TIDAK di /splash),
+          // arahkan kembali ke splash sampai status auth jelas.
+          // Ini sebagai fallback jika ada navigasi ke path lain terlalu cepat.
+          print('Auth State Loading: Redirecting to /splash to wait for auth state.');
+          return '/splash';
+        },
+        error: (error, stackTrace) {
+          print('Auth State Error: $error');
+          print('Auth State Stack Trace: $stackTrace');
+          // Jika terjadi error dalam mengambil status otentikasi (dan kita TIDAK di /splash),
+          // arahkan ke layar login.
+          print('Auth State Error: Redirecting to /login due to authentication error.');
+          return '/login';
+        },
       );
     },
     routes: [
+      // Definisi rute untuk setiap layar di aplikasi
       GoRoute(
         path: '/splash',
         name: 'splash',
@@ -98,6 +144,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
+// Kelas pembantu untuk navigasi yang lebih mudah
 class AppNavigator {
   static void goToHome(BuildContext context) {
     context.go('/home');
