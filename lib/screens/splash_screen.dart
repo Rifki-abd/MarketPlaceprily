@@ -26,6 +26,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Menunda navigasi agar splash screen terlihat selama 2 detik
     await Future.delayed(const Duration(seconds: 2));
 
+    // Pastikan widget masih mounted sebelum melanjutkan operasi yang memerlukan context
+    if (!mounted) return;
+
     // Gunakan ref.read untuk mendapatkan nilai terakhir dari authStateProvider
     // Ini aman di initState karena kita sudah memastikan provider diinisialisasi di main.dart
     final authState = ref.read(authStateProvider);
@@ -34,6 +37,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Kita perlu memastikan bahwa data sudah tersedia atau ada error
     authState.when(
       data: (user) {
+        if (!mounted) return; // Periksa kembali sebelum navigasi
         if (user != null) {
           // Jika user sudah login, arahkan ke Home Screen
           AppNavigator.goToHome(context);
@@ -43,11 +47,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         }
       },
       loading: () {
+        if (!mounted) return; // Periksa kembali sebelum navigasi
         // Seharusnya tidak masuk ke sini karena kita sudah menunggu stream selesai
         // Tetapi sebagai fallback, kita bisa tetap ke login atau memberikan pesan error
         AppNavigator.goToLogin(context);
       },
       error: (error, stackTrace) {
+        if (!mounted) return; // Periksa kembali sebelum navigasi
         // Jika terjadi error, arahkan ke Login Screen
         print('Error during authentication check: $error');
         AppNavigator.goToLogin(context);

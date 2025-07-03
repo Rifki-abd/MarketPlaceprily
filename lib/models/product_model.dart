@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class ProductModel {
   final String id;
   final String sellerId;
@@ -27,21 +25,23 @@ class ProductModel {
     required this.updatedAt,
   });
 
+  // Assuming timestamp fields from Supabase are ISO 8601 strings
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     return ProductModel(
-      id: map['id'] ?? '',
+      id: map['id'] is int ? map['id'].toString() : map['id'] ?? '', // Handle potential integer ID from Supabase
       sellerId: map['seller_id'] ?? '',
       sellerName: map['seller_name'] ?? '',
       name: map['name'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
       description: map['description'] ?? '',
       location: map['location'] ?? '',
-      imageUrl: map['image_url'],
+      imageUrl: map['image_url'], // Assuming image_url can be null
       waNumber: map['wa_number'] ?? '',
-      createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (map['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: DateTime.parse(map['created_at'] as String),
+      updatedAt: DateTime.parse(map['updated_at'] as String),
     );
   }
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -53,9 +53,9 @@ class ProductModel {
       'description': description,
       'location': location,
       'image_url': imageUrl,
-      'wa_number': waNumber,
-      'created_at': Timestamp.fromDate(createdAt),
-      'updated_at': Timestamp.fromDate(updatedAt),
+      'wa_number': waNumber, // Ensure this is the column name in Supabase
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
 

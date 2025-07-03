@@ -42,6 +42,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // BAGIAN INI ADALAH PANGGILAN UNTUK REGISTRASI
       await ref.read(authServiceProvider).signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -96,9 +97,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   'Buat Akun Baru',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -168,8 +169,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   'Pilih Role',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                          fontWeight: FontWeight.w600,
+                        ),
                 ),
                 const SizedBox(height: 12),
                 Column(

@@ -96,42 +96,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Info Card - No Image Upload
-              Card(
-                color: Colors.blue.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.blue.shade700,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Mode Gratis',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Upload gambar tidak tersedia di versi gratis.\nUpgrade ke Blaze Plan untuk fitur lengkap.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+            children: [ // Removed Info Card and SizedBox below it.
 
               CustomTextField(
                 controller: _nameController,

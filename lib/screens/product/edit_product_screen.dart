@@ -140,42 +140,6 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Info Card - No Image Upload
-              Card(
-                color: Colors.orange.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.edit_note,
-                        color: Colors.orange.shade700,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Edit Mode Gratis',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Edit gambar tidak tersedia di versi gratis.\nUpgrade ke Blaze Plan untuk fitur lengkap.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.orange.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
               CustomTextField(
                 controller: _nameController,
                 labelText: 'Nama Produk',

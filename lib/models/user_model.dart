@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum UserRole { admin, penjual, pembeli }
 
 class UserModel {
@@ -29,18 +27,18 @@ class UserModel {
         orElse: () => UserRole.pembeli,
       ),
       waNumber: map['wa_number'],
-      createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name,
+      'name': name, // Ensure 'name' is included here
       'email': email,
       'role': role.toString().split('.').last,
-      'wa_number': waNumber,
-      'created_at': Timestamp.fromDate(createdAt),
+      'wa_number': waNumber, // Ensure this is the column name in Supabase
+      'created_at': createdAt.toIso8601String(),
     };
   }
 
