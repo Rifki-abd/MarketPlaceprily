@@ -25,23 +25,21 @@ class ProductModel {
     required this.updatedAt,
   });
 
-  // Assuming timestamp fields from Supabase are ISO 8601 strings
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     return ProductModel(
-      id: map['id'] is int ? map['id'].toString() : map['id'] ?? '', // Handle potential integer ID from Supabase
-      sellerId: map['seller_id'] ?? '',
-      sellerName: map['seller_name'] ?? '',
-      name: map['name'] ?? '',
-      price: (map['price'] ?? 0).toDouble(),
-      description: map['description'] ?? '',
-      location: map['location'] ?? '',
-      imageUrl: map['image_url'], // Assuming image_url can be null
-      waNumber: map['wa_number'] ?? '',
-      createdAt: DateTime.parse(map['created_at'] as String),
-      updatedAt: DateTime.parse(map['updated_at'] as String),
+      id: _asString(map['id']),
+      sellerId: _asString(map['seller_id']),
+      sellerName: _asString(map['seller_name']),
+      name: _asString(map['name']),
+      price: _asDouble(map['price']),
+      description: _asString(map['description']),
+      location: _asString(map['location']),
+      imageUrl: map['image_url']?.toString(),
+      waNumber: _asString(map['wa_number']),
+      createdAt: _asDate(map['created_at']),
+      updatedAt: _asDate(map['updated_at']),
     );
   }
-
 
   Map<String, dynamic> toMap() {
     return {
@@ -53,7 +51,7 @@ class ProductModel {
       'description': description,
       'location': location,
       'image_url': imageUrl,
-      'wa_number': waNumber, // Ensure this is the column name in Supabase
+      'wa_number': waNumber,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -85,5 +83,18 @@ class ProductModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  // Helper untuk memastikan parsing aman
+  static String _asString(dynamic value) => value?.toString() ?? '';
+  static double _asDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
+  }
+
+  static DateTime _asDate(dynamic value) {
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value?.toString() ?? '') ?? DateTime.now();
   }
 }

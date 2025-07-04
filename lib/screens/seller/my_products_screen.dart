@@ -44,7 +44,7 @@ class MyProductsScreen extends ConsumerWidget {
                   return ProductCard(
                     product: product,
                     showActions: true,
-                    onEdit: () => AppNavigator.goToEditProduct(context, product.id),
+                    onEdit: () => context.go(context, product.id),
                     onDelete: () => _showDeleteDialog(context, ref, product),
                   );
                 },
@@ -65,7 +65,7 @@ class MyProductsScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => AppNavigator.goToAddProduct(context),
+        onPressed: () => context.go(context),
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: _buildBottomNavBar(context, currentUserAsync.value),
@@ -84,10 +84,9 @@ class MyProductsScreen extends ConsumerWidget {
             AppNavigator.goToHome(context);
             break;
           case 1:
-            // Already here
-            break;
+            break; // Sudah di halaman ini
           case 2:
-            AppNavigator.goToProfile(context);
+            context.go(context);
             break;
         }
       },
@@ -138,6 +137,7 @@ class MyProductsScreen extends ConsumerWidget {
               backgroundColor: Colors.green,
             ),
           );
+          ref.invalidate(myProductsProvider(product.sellerId));
         }
       } catch (e) {
         if (context.mounted) {

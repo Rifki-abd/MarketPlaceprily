@@ -21,6 +21,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -29,9 +32,13 @@ class ProductCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 4,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap ?? () => AppNavigator.goToProductDetail(context, product.id),
+        onTap: onTap ?? () => context.go(context, product.id),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -50,19 +57,23 @@ class ProductCard extends StatelessWidget {
                         if (loadingProgress == null) return child;
                         return const Center(child: CircularProgressIndicator());
                       },
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                        color: Colors.grey,
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 60,
+                          color: Colors.grey,
+                        ),
                       ),
                     )
-                  : const Icon(
-                      Icons.image,
-                      size: 50,
-                      color: Colors.grey,
+                  : const Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
                     ),
             ),
-            
+
             // Product Info
             Padding(
               padding: const EdgeInsets.all(16),
@@ -71,28 +82,25 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     currencyFormatter.format(product.price),
-                    style: const TextStyle(
-                      fontSize: 20,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     product.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -103,15 +111,14 @@ class ProductCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 16,
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurface.withOpacity(0.6),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           product.location,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -119,17 +126,16 @@ class ProductCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     'Oleh: ${product.sellerName}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ),
-                  
-                  // Action buttons for seller/admin
-                  if (showActions) ...[
+
+                  // Optional action buttons
+                  if (showActions && (onEdit != null || onDelete != null)) ...[
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -137,11 +143,13 @@ class ProductCard extends StatelessWidget {
                         if (onEdit != null)
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
+                            tooltip: 'Edit produk',
                             onPressed: onEdit,
                           ),
                         if (onDelete != null)
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
+                            tooltip: 'Hapus produk',
                             onPressed: onDelete,
                           ),
                       ],

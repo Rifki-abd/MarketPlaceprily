@@ -28,18 +28,24 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
-      maxLines: maxLines,
+      maxLines: obscureText ? 1 : maxLines,
       enabled: enabled,
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: theme.iconTheme.color) : null,
         suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: theme.inputDecorationTheme.fillColor ?? Colors.grey.shade100,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -49,10 +55,13 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.colorScheme.error),
+        ),
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
       ),
     );
   }

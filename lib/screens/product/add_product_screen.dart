@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../services/auth_service.dart';
 import '../../services/product_service.dart';
-import '../../widgets/custom_text_field.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -18,8 +16,6 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
-  final _waNumberController = TextEditingController();
-
   bool _isLoading = false;
 
   @override
@@ -28,56 +24,35 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     _priceController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
-    _waNumberController.dispose();
     super.dispose();
   }
 
-  Future<void> _addProduct() async {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
+    
+    final currentUser = ref.read(currentUserProvider).value;
+    if (currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Anda harus login untuk membuat produk.'), backgroundColor: Colors.red));
+        setState(() => _isLoading = false);
+        return;
+    }
 
     try {
-      final currentUser = await ref.read(authServiceProvider).getCurrentUserData();
-      if (currentUser == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pengguna tidak ditemukan'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
-
-      await ref.read(productServiceProvider).createProduct(
-        seller: currentUser,
-        name: _nameController.text.trim(),
-        price: double.parse(_priceController.text.trim()),
-        description: _descriptionController.text.trim(),
-        location: _locationController.text.trim(),
-        waNumber: _waNumberController.text.trim(),
-      );
-
-      if (mounted) {
-        // Use Navigator.pop to go back instead of navigation
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Produk berhasil ditambahkan'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      final productData = {
+        'seller_id': currentUser.id,
+        'seller_name': currentUser.name,
+        'name': _nameController.text.trim(),
+        'price': double.parse(_priceController.text.trim()),
+        'description': _descriptionController.text.trim(),
+        'location': _locationController.text.trim(),
+        'wa_number': currentUser.waNumber ?? '',
+      };
+      await ref.read(productServiceProvider).createProduct(productData);
+      if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menambahkan produk: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -87,99 +62,22 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tambah Produk'),
-      ),
+      appBar: AppBar(title: const Text('Tambah Produk')),
       body: Form(
         key: _formKey,
-        child: SingleChildScrollView(
+        child: ListView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [ // Removed Info Card and SizedBox below it.
-
-              CustomTextField(
-                controller: _nameController,
-                labelText: 'Nama Produk',
-                prefixIcon: Icons.shopping_bag,
-                validator: (value) {
-                  if (value?.isEmpty ?? true) return 'Nama produk tidak boleh kosong';
-                  if (value!.length < 3) return 'Nama produk minimal 3 karakter';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              CustomTextField(
-                controller: _priceController,
-                labelText: 'Harga (Rp)',
-                prefixIcon: Icons.attach_money,
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value?.isEmpty ?? true) return 'Harga tidak boleh kosong';
-                  final price = double.tryParse(value!);
-                  if (price == null) return 'Harga harus berupa angka';
-                  if (price <= 0) return 'Harga harus lebih dari 0';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              CustomTextField(
-                controller: _descriptionController,
-                labelText: 'Deskripsi',
-                prefixIcon: Icons.description,
-                maxLines: 4,
-                validator: (value) {
-                  if (value?.isEmpty ?? true) return 'Deskripsi tidak boleh kosong';
-                  if (value!.length < 10) return 'Deskripsi minimal 10 karakter';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              CustomTextField(
-                controller: _locationController,
-                labelText: 'Lokasi',
-                prefixIcon: Icons.location_on,
-                validator: (value) {
-                  if (value?.isEmpty ?? true) return 'Lokasi tidak boleh kosong';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              CustomTextField(
-                controller: _waNumberController,
-                labelText: 'Nomor WhatsApp',
-                prefixIcon: Icons.phone,
-                keyboardType: TextInputType.phone,
-                hintText: 'Contoh: 08123456789',
-                validator: (value) {
-                  if (value?.isEmpty ?? true) return 'Nomor WhatsApp tidak boleh kosong';
-                  if (value!.length < 10) return 'Nomor WhatsApp tidak valid';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-
-              ElevatedButton(
-                onPressed: _isLoading ? null : _addProduct,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const SpinKitThreeBounce(color: Colors.white, size: 20)
-                    : const Text(
-                        'Tambah Produk',
-                        style: TextStyle(fontSize: 16),
-                      ),
-              ),
-            ],
-          ),
+          children: [
+            TextFormField(controller: _nameController, decoration: const InputDecoration(labelText: 'Nama Produk'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+            TextFormField(controller: _priceController, decoration: const InputDecoration(labelText: 'Harga'), keyboardType: TextInputType.number, validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+            TextFormField(controller: _descriptionController, decoration: const InputDecoration(labelText: 'Deskripsi'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+            TextFormField(controller: _locationController, decoration: const InputDecoration(labelText: 'Lokasi'), validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _submit,
+              child: _isLoading ? const CircularProgressIndicator() : const Text('Simpan'),
+            )
+          ],
         ),
       ),
     );

@@ -8,7 +8,7 @@ class UserModel {
   final String? waNumber;
   final DateTime createdAt;
 
-  UserModel({
+  const UserModel({
     required this.id,
     required this.name,
     required this.email,
@@ -19,25 +19,22 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      role: UserRole.values.firstWhere(
-        (e) => e.toString().split('.').last == map['role'],
-        orElse: () => UserRole.pembeli,
-      ),
-      waNumber: map['wa_number'],
-      createdAt: DateTime.parse(map['created_at'] as String),
+      id: _asString(map['id']),
+      name: _asString(map['name']),
+      email: _asString(map['email']),
+      role: _parseUserRole(map['role']),
+      waNumber: map['wa_number']?.toString(),
+      createdAt: _asDate(map['created_at']),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name, // Ensure 'name' is included here
+      'name': name,
       'email': email,
-      'role': role.toString().split('.').last,
-      'wa_number': waNumber, // Ensure this is the column name in Supabase
+      'role': role.name,
+      'wa_number': waNumber,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -58,5 +55,45 @@ class UserModel {
       waNumber: waNumber ?? this.waNumber,
       createdAt: createdAt ?? this.createdAt,
     );
+  }
+
+  static UserRole _parseUserRole(dynamic role) {
+    if (role is String) {
+      return UserRole.values.firstWhere(
+        (e) => e.name.toLowerCase() == role.toLowerCase(),
+        orElse: () => UserRole.pembeli,
+      );
+    }
+    return UserRole.pembeli;
+  }
+
+  static String _asString(dynamic value) => value?.toString() ?? '';
+
+  static DateTime _asDate(dynamic value) {
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value?.toString() ?? '') ?? DateTime.now();
+  }
+
+  @override
+  String toString() {
+    return 'UserModel(id: $id, name: $name, email: $email, role: ${role.name}, waNumber: $waNumber, createdAt: $createdAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is UserModel &&
+            runtimeType == other.runtimeType &&
+            id == other.id &&
+            name == other.name &&
+            email == other.email &&
+            role == other.role &&
+            waNumber == other.waNumber &&
+            createdAt == other.createdAt;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(id, name, email, role, waNumber, createdAt);
   }
 }

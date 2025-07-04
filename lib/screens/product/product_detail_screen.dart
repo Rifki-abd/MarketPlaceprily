@@ -20,22 +20,21 @@ class ProductDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUserAsync = ref.watch(currentUserProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Produk'),
         actions: currentUserAsync.when(
           data: (user) {
             if (user == null) return [];
-            
+
             return [
               FutureBuilder<ProductModel?>(
                 future: ref.read(productServiceProvider).getProductById(productId),
                 builder: (context, snapshot) {
                   final product = snapshot.data;
                   if (product == null) return const SizedBox.shrink();
-                  
-                  // Show edit/delete for product owner or admin
+
                   if (user.role == UserRole.admin || product.sellerId == user.id) {
                     return PopupMenuButton(
                       itemBuilder: (context) => [
@@ -63,7 +62,7 @@ class ProductDetailScreen extends ConsumerWidget {
                       ],
                       onSelected: (value) async {
                         if (value == 'edit') {
-                          AppNavigator.goToEditProduct(context, productId);
+                          context.go(context, productId);
                         } else if (value == 'delete') {
                           _showDeleteDialog(context, ref, product);
                         }
@@ -128,7 +127,6 @@ class ProductDetailScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product Image
           Container(
             height: 300,
             width: double.infinity,
@@ -155,13 +153,11 @@ class ProductDetailScreen extends ConsumerWidget {
                     color: Colors.grey,
                   ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Product Name
                 Text(
                   product.name,
                   style: const TextStyle(
@@ -170,8 +166,6 @@ class ProductDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Price
                 Text(
                   currencyFormatter.format(product.price),
                   style: const TextStyle(
@@ -181,8 +175,6 @@ class ProductDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Location
                 Row(
                   children: [
                     const Icon(Icons.location_on, color: Colors.red),
@@ -197,8 +189,6 @@ class ProductDetailScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Description
                 const Text(
                   'Deskripsi',
                   style: TextStyle(
@@ -212,8 +202,6 @@ class ProductDetailScreen extends ConsumerWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 24),
-
-                // Seller Info
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -263,8 +251,6 @@ class ProductDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // WhatsApp Contact Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -295,7 +281,7 @@ class ProductDetailScreen extends ConsumerWidget {
     try {
       final cleanNumber = waNumber.replaceAll(RegExp(r'[^\d]'), '');
       final url = 'https://wa.me/$cleanNumber';
-      
+
       if (await canLaunchUrl(Uri.parse(url))) {
         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       } else {

@@ -33,10 +33,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authServiceProvider).signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+
       if (mounted) {
         AppNavigator.goToHome(context);
       }
@@ -58,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -66,6 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 60),
                 const Icon(
                   Icons.shopping_bag,
                   size: 80,
@@ -73,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Welcome Back!',
+                  'Selamat Datang!',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
@@ -82,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Masuk ke akun Anda',
+                  'Silakan masuk untuk melanjutkan',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -95,8 +96,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: Icons.email,
                   validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Email tidak boleh kosong';
-                    if (!value!.contains('@')) return 'Format email tidak valid';
+                    if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
+                    if (!value.contains('@')) return 'Format email tidak valid';
                     return null;
                   },
                 ),
@@ -111,25 +112,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                   validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Password tidak boleh kosong';
-                    if (value!.length < 6) return 'Password minimal 6 karakter';
+                    if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
+                    if (value.length < 6) return 'Password minimal 6 karakter';
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _signIn,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   child: _isLoading
-                      ? const SpinKitThreeBounce(color: Colors.white, size: 20)
-                      : const Text('Login', style: TextStyle(fontSize: 16)),
+                      ? const SpinKitThreeBounce(
+                          color: Colors.white,
+                          size: 20,
+                        )
+                      : const Text(
+                          'Login',
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Belum punya akun? ', style: TextStyle(color: Colors.grey[600])),
+                    Text('Belum punya akun? ',
+                        style: TextStyle(color: Colors.grey[600])),
                     TextButton(
-                      onPressed: () => AppNavigator.goToRegister(context),
+                      onPressed: () => context.go("/register")(context),
                       child: const Text('Daftar Sekarang'),
                     ),
                   ],
