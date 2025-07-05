@@ -1,8 +1,8 @@
 {pkgs}: {
   channel = "stable-24.05";
   packages = [
-    pkgs.flutter
-    pkgs.google-chrome
+    pkgs.flutter          # <-- Pastikan ini ada
+    pkgs.google-chrome    # <-- Dan ini untuk Chrome
   ];
   idx.extensions = [
     "dart-code.flutter"
