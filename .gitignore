@@ -5,44 +5,55 @@
 *.swp
 .DS_Store
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
-migrate_working_dir/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
+# Flutter
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
+/ios/Pods/
+/ios/Flutter/ephemeral/
+/ios/Flutter/app.flx
+/ios/Flutter/flutter_assets/
+/ios/.symlinks/
+/ios/Runner/GeneratedPluginRegistrant.*
 
-# Symbolication related
-app.*.symbols
+# Android
+/android/key.properties
+/android/local.properties
+/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+/android/app/google-services.json
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/app/build/outputs
+/android/app/build/reports
 
-# Obfuscation related
-app.*.map.json
+# Web
+/web/
+lib/.env
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-.env
-\n# Environment variables\n.env
-\n# Environment variables\nlib/.env
+# Environment variables
+.env*
+!/.env.example
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Dart
+.dart_tool/
+.packages
+
+# Pub
+.pub-cache/
+.pub-cache
+pubspec.lock

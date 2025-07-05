@@ -1,0 +1,49 @@
+# .github/workflows/ci.yaml
+
+name: Flutter CI
+
+# Pemicu: Workflow ini akan berjalan pada setiap push ke branch 'main'
+# dan pada setiap Pull Request yang ditargetkan ke 'main'.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Langkah 1: Checkout kode dari repositori
+      - name: 📚 Checkout Code
+        uses: actions/checkout@v3
+
+      # Langkah 2: Setup Java (diperlukan oleh Flutter)
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      # Langkah 3: Setup Flutter SDK
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Menggunakan channel stable Flutter
+
+      # Langkah 4: Install dependensi
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      # Langkah 5: Analisis kode dengan linter
+      - name: 🔬 Analyze Code
+        run: flutter analyze
+
+      # Langkah 6: Jalankan unit dan widget tests
+      - name: 🧪 Run Tests
+        run: flutter test
+
+      # (Opsional) Langkah 7: Build aplikasi untuk Android (memastikan proses build tidak gagal)
+      # - name: 🏗️ Build APK
+      #   run: flutter build apk --debug
