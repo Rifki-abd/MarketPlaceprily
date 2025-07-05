@@ -3,13 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:marketplace_app/features/product/domain/product_model.dart'; // FIX: Path impor diperbaiki
+import 'package:preloft_app/features/product/domain/product_model.dart'; // FIX: Path impor diperbaiki
 
 class ProductCard extends StatelessWidget {
 
   const ProductCard({
-    super.key,
-    required this.product,
+    required this.product, super.key,
     this.showActions = false,
     this.onEdit,
     this.onDelete,

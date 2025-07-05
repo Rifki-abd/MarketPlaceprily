@@ -1,11 +1,12 @@
 // lib/features/auth/presentation/providers/auth_provider.dart
 
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:preloft_app/core/providers/supabase_provider.dart';
+import 'package:preloft_app/features/auth/data/auth_repository.dart';
+import 'package:preloft_app/features/auth/domain/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:marketplace_app/features/auth/data/auth_repository.dart';
-import 'package:marketplace_app/features/auth/domain/user_model.dart';
-import 'package:marketplace_app/core/providers/supabase_provider.dart';
 
 /// ## Auth Repository Provider
 /// Menyediakan instance [AuthRepository] untuk digunakan oleh provider lain.

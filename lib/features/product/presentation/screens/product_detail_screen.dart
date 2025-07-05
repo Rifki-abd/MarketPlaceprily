@@ -2,34 +2,77 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marketplace_app/features/cart/presentation/providers/cart_provider.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
-import 'package:marketplace_app/features/product/domain/product_model.dart'; // FIX: Path impor diperbaiki
-import 'package:marketplace_app/features/product/presentation/providers/product_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/features/product/domain/product_model.dart';
+import 'package:preloft_app/features/product/presentation/providers/product_provider.dart';
+import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// ## Product Detail Screen
-/// Menampilkan detail lengkap dari satu produk.
 class ProductDetailScreen extends ConsumerWidget {
-  const ProductDetailScreen({super.key, required this.productId});
+  const ProductDetailScreen({required this.productId, super.key});
   final String productId;
+
+  Future<void> _launchWhatsApp(BuildContext context, String waNumber) async {
+    // Menambahkan nomor negara jika tidak ada
+    final number = waNumber.startsWith('62') ? waNumber : '62${waNumber.substring(1)}';
+    final url = Uri.parse('https://wa.me/$number');
+    
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tidak bisa membuka WhatsApp')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // FIX: Watch stream provider utama untuk mendapatkan AsyncValue
-    final productAsync = ref.watch(productByIdProvider(productId));
+    final allProductsAsync = ref.watch(allProductsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Produk'),
       ),
-      // FIX: Gunakan .when pada AsyncValue, bukan pada ProductModel?
-      body: productAsync == null
-          ? const Center(child: LoadingWidget(message: 'Memuat produk...'))
-          : _buildProductDetails(context, ref, productAsync),
+      body: allProductsAsync.when(
+        data: (products) {
+          // --- PERBAIKAN LOGIKA PENCARIAN PRODUK ---
+          ProductModel? product;
+          try {
+            product = products.firstWhere((p) => p.id == productId);
+          } catch (e) {
+            product = null; // Produk tidak ditemukan dalam list
+          }
+          // -----------------------------------------
+
+          if (product == null) {
+            return const EmptyStateWidget(
+              title: 'Produk Tidak Ditemukan',
+              message: 'Produk yang Anda cari mungkin telah dihapus atau tidak tersedia.',
+              icon: Icons.search_off,
+            );
+          }
+          return _buildProductDetails(context, ref, product);
+        },
+        loading: () => const Center(child: LoadingWidget(message: 'Memuat produk...')),
+        error: (err, stack) => Center(
+          child: EmptyStateWidget(
+            title: 'Gagal Memuat Produk',
+            message: err.toString(),
+            icon: Icons.error_outline,
+            onRefresh: () => ref.invalidate(allProductsStreamProvider),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildProductDetails(BuildContext context, WidgetRef ref, ProductModel product) {
+    final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
     return Column(
       children: [
         Expanded(
@@ -41,22 +84,54 @@ class ProductDetailScreen extends ConsumerWidget {
                 Container(
                   height: 250,
                   width: double.infinity,
-                  color: Colors.grey.shade200,
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image, size: 100, color: Colors.grey),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            product.imageUrl!,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(child: LoadingWidget());
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, size: 80, color: Colors.grey),
+                          )
+                        : const Icon(Icons.image, size: 80, color: Colors.grey),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text(product.name, style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 24),
+                Text(product.name, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Text(
-                  'Rp ${product.price.toStringAsFixed(0)}',
+                  currencyFormatter.format(product.price),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 16),
-                Text(product.description),
+                const Divider(height: 32),
+                Text('Deskripsi', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text(product.description, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5)),
+                const Divider(height: 32),
+                Text('Informasi Penjual', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const CircleAvatar(child: Icon(Icons.store)),
+                  title: Text(product.sellerName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(product.location),
+                  trailing: IconButton(
+                    icon: Icon(Icons.message, color: Colors.green.shade700),
+                    onPressed: () => _launchWhatsApp(context, product.waNumber),
+                    tooltip: 'Hubungi via WhatsApp',
+                  ),
+                ),
               ],
             ),
           ),
@@ -72,23 +147,32 @@ class ProductDetailScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, -4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
         ],
       ),
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: () {
           ref.read(cartProvider.notifier).addProduct(product);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('${product.name} ditambahkan ke keranjang.'),
-              duration: const Duration(seconds: 1),
+              duration: const Duration(seconds: 2),
+              action: SnackBarAction(
+                label: 'Lihat',
+                onPressed: () => context.push('/cart'),
+              ),
             ),
           );
         },
+        icon: const Icon(Icons.add_shopping_cart),
+        label: const Text('Tambah ke Keranjang'),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 50),
         ),
-        child: const Text('Tambah ke Keranjang'),
       ),
     );
   }

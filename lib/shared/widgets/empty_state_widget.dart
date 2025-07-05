@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class EmptyStateWidget extends StatelessWidget {
 
   const EmptyStateWidget({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.icon,
+    required this.title, required this.message, required this.icon, super.key,
     this.onRefresh,
   });
   final String title;

@@ -1,9 +1,9 @@
 // lib/features/admin/presentation/providers/admin_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marketplace_app/core/providers/supabase_provider.dart';
-import 'package:marketplace_app/features/admin/data/admin_repository.dart';
-import 'package:marketplace_app/features/admin/domain/admin_statistics_model.dart';
+import 'package:preloft_app/core/providers/supabase_provider.dart';
+import 'package:preloft_app/features/admin/data/admin_repository.dart';
+import 'package:preloft_app/features/admin/domain/admin_statistics_model.dart';
 
 /// ## Admin Repository Provider
 /// Menyediakan instance [AdminRepository].

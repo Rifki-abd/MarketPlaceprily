@@ -2,14 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:marketplace_app/shared/widgets/empty_state_widget.dart';
-import 'package:marketplace_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
 
-/// ## Cart Screen
-///
-/// Layar yang menampilkan semua item di dalam keranjang belanja.
-/// UI ini sepenuhnya reaktif terhadap perubahan state dari `cartProvider`.
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
@@ -21,6 +18,16 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        // Tombol kembali ini akan memanggil context.pop()
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Kita cek dulu apakah bisa kembali sebelum memanggil pop
+            if (context.canPop()) {
+              context.pop();
+            }
+          },
+        ),
         title: const Text('Keranjang Saya'),
         actions: [
           if (cartItems.isNotEmpty)

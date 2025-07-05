@@ -6,10 +6,12 @@
 /// ditampilkan di dashboard admin.
 class AdminStatistics {
 
-  AdminStatistics({
+  // PERBAIKAN: Tambahkan 'const' pada konstruktor.
+  const AdminStatistics({
     required this.userCount,
     required this.productCount,
   });
+  
   final int userCount;
   final int productCount;
 }

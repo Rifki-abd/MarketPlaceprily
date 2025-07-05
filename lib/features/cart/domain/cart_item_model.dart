@@ -1,6 +1,6 @@
 // lib/features/cart/domain/cart_item_model.dart
 
-import 'package:marketplace_app/features/product/domain/product_model.dart';
+import 'package:preloft_app/features/product/domain/product_model.dart';
 
 /// ## Cart Item Model
 ///

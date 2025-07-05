@@ -1,8 +1,8 @@
 // test/features/auth/data/auth_repository_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mocktail/mocktail.dart'; // Paket populer untuk mocking
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Buat kelas Mock untuk SupabaseClient
 class MockSupabaseClient extends Mock implements SupabaseClient {}

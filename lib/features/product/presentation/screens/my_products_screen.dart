@@ -3,11 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:marketplace_app/features/product/domain/product_model.dart';
-import 'package:marketplace_app/shared/widgets/empty_state_widget.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
-import 'package:marketplace_app/features/product/presentation/providers/product_provider.dart';
-import 'package:marketplace_app/features/product/presentation/widgets/product_card.dart';
+import 'package:preloft_app/features/product/domain/product_model.dart';
+import 'package:preloft_app/features/product/presentation/providers/product_provider.dart';
+import 'package:preloft_app/features/product/presentation/widgets/product_card.dart';
+import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
 
 /// ## My Products Screen
 ///
@@ -24,27 +23,36 @@ class MyProductsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Produk Saya'),
       ),
-      body: myProducts.isEmpty
-          ? EmptyStateWidget(
-              title: 'Belum Ada Produk',
-              message: 'Anda belum menambahkan produk untuk dijual.',
-              icon: Icons.inventory_2,
-              onRefresh: () => ref.invalidate(allProductsStreamProvider),
-            )
-          : ListView.builder(
-              itemCount: myProducts.length,
-              itemBuilder: (context, index) {
-                final product = myProducts[index];
-                return ProductCard(
-                  product: product,
-                  showActions: true,
-                  onEdit: () => context.go('/edit-product/${product.id}'),
-                  onDelete: () => _showDeleteDialog(context, ref, product),
-                );
-              },
-            ),
+      body: RefreshIndicator( // Tambahkan RefreshIndicator di sini
+        onRefresh: () async => ref.invalidate(allProductsStreamProvider),
+        child: myProducts.isEmpty
+            ? Stack( // Gunakan Stack agar bisa di-scroll untuk refresh
+                children: [
+                  ListView(), // Widget yang bisa di-scroll
+                  const EmptyStateWidget( // PERBAIKAN: Menambahkan 'const'
+                    title: 'Belum Ada Produk',
+                    message: 'Anda belum menambahkan produk untuk dijual.',
+                    icon: Icons.inventory_2,
+                    // onRefresh tidak lagi diperlukan di sini
+                  ),
+                ],
+              )
+            : ListView.builder(
+                itemCount: myProducts.length,
+                itemBuilder: (context, index) {
+                  final product = myProducts[index];
+                  return ProductCard(
+                    product: product,
+                    showActions: true,
+                    // Gunakan push untuk navigasi yang lebih baik
+                    onEdit: () => context.push('/edit-product/${product.id}'),
+                    onDelete: () => _showDeleteDialog(context, ref, product),
+                  );
+                },
+              ),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/add-product'),
+        onPressed: () => context.push('/add-product'),
         tooltip: 'Tambah Produk',
         child: const Icon(Icons.add),
       ),
@@ -69,7 +77,12 @@ class MyProductsScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(productActionNotifierProvider.notifier).deleteProduct(product.id);
+      final success = await ref.read(productActionNotifierProvider.notifier).deleteProduct(product.id);
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('"${product.name}" berhasil dihapus.'), backgroundColor: Colors.green),
+        );
+      }
     }
   }
 }

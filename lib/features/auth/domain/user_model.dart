@@ -7,8 +7,7 @@ class UserModel {
     required this.name,
     required this.email,
     required this.role,
-    this.waNumber,
-    required this.createdAt,
+    required this.createdAt, this.waNumber,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {

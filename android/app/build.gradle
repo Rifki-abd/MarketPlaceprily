@@ -23,16 +23,17 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.marketplace_app"
-    compileSdk flutter.compileSdkVersion
+    namespace = "com.example.marketplace_app"
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = '1.8'
     }
 
     sourceSets {
@@ -40,25 +41,26 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.marketplace_app"
-        minSdk flutter.minSdkVersion
-        targetSdk flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-        multiDexEnabled true
+        applicationId = "com.example.marketplace_app"
+        // Gunakan operator '=' untuk sintaks modern
+        minSdk = 21
+        targetSdk = 33
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            // Ganti 'signingConfig signingConfigs.debug' dengan sintaks modern
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
 
 flutter {
-    source "../.."
+    source = "../.."
 }
 
 dependencies {
-    implementation 'androidx.multidex:multidex:2.0.1'
+    // Tambahkan dependensi yang mungkin Anda butuhkan di sini
 }

@@ -1,33 +1,31 @@
 // lib/features/product/data/product_repository.dart
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:marketplace_app/features/product/domain/product_model.dart';
+import 'dart:io';
 
-/// ## Product Repository
-///
-/// Bertanggung jawab untuk operasi CRUD (Create, Read, Update, Delete)
-/// terkait produk dengan Supabase.
-/// Layer ini mengisolasi logika akses data dari sisa aplikasi.
+import 'package:preloft_app/features/product/domain/product_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class ProductRepository {
   ProductRepository(this._client);
   final SupabaseClient _client;
 
-  /// Mengambil semua produk dari database.
-  /// Menggunakan stream untuk data real-time.
-  Stream<List<ProductModel>> getAllProductsStream() {
+  // Fungsi untuk upload gambar (Tidak berubah)
+  Future<String> uploadProductImage({
+    required File image,
+    required String productId,
+  }) async {
     try {
-      return _client
-          .from('products')
-          .stream(primaryKey: ['id'])
-          .order('created_at')
-          .map((data) => data.map(ProductModel.fromMap).toList());
+      final imageExtension = image.path.split('.').last.toLowerCase();
+      final imagePath = '/$productId/product.$imageExtension';
+      
+      await _client.storage.from('product-images').upload(imagePath, image);
+      return _client.storage.from('product-images').getPublicUrl(imagePath);
     } catch (e) {
-      // Mengubah error menjadi stream error untuk ditangani oleh provider
-      return Stream.error(Exception('Gagal mengambil data produk: $e'));
+      throw Exception('Gagal mengunggah gambar: $e');
     }
   }
 
-  /// Menambah produk baru ke database.
+  // Fungsi untuk menyimpan data produk ke database
   Future<void> createProduct(Map<String, dynamic> data) async {
     try {
       await _client.from('products').insert(data);
@@ -36,7 +34,20 @@ class ProductRepository {
     }
   }
 
-  /// Memperbarui produk yang ada di database.
+  // --- Sisa kode tidak berubah ---
+
+  Stream<List<ProductModel>> getAllProductsStream() {
+    try {
+      return _client
+          .from('products')
+          .stream(primaryKey: ['id'])
+          .order('created_at')
+          .map((data) => data.map(ProductModel.fromMap).toList());
+    } catch (e) {
+      return Stream.error(Exception('Gagal mengambil data produk: $e'));
+    }
+  }
+
   Future<void> updateProduct(String productId, Map<String, dynamic> data) async {
     try {
       await _client.from('products').update(data).eq('id', productId);
@@ -45,7 +56,6 @@ class ProductRepository {
     }
   }
 
-  /// Menghapus produk dari database.
   Future<void> deleteProduct(String productId) async {
     try {
       await _client.from('products').delete().eq('id', productId);

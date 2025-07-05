@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
-import 'package:marketplace_app/features/admin/presentation/providers/admin_provider.dart';
+import 'package:preloft_app/features/admin/presentation/providers/admin_provider.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart';
 
 /// ## Admin Dashboard Screen
 ///

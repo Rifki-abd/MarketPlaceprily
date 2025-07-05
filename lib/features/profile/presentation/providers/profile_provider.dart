@@ -1,9 +1,9 @@
 // lib/features/profile/presentation/providers/profile_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marketplace_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:marketplace_app/core/providers/supabase_provider.dart';
-import 'package:marketplace_app/features/profile/data/profile_repository.dart';
+import 'package:preloft_app/core/providers/supabase_provider.dart';
+import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:preloft_app/features/profile/data/profile_repository.dart';
 
 /// ## Profile Repository Provider
 ///

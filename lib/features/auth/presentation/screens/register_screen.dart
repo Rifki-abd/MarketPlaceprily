@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:marketplace_app/features/auth/domain/user_model.dart';
-import 'package:marketplace_app/shared/widgets/custom_text_field.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
-import 'package:marketplace_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:preloft_app/features/auth/domain/user_model.dart';
+import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:preloft_app/shared/widgets/custom_text_field.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -19,38 +19,55 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController(); // Controller baru
   UserRole _selectedRole = UserRole.pembeli;
+
+  // State untuk mengatur visibilitas password
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose(); // Jangan lupa dispose
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        await ref.read(authProvider.notifier).signUp(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          name: _nameController.text.trim(),
-          role: _selectedRole,
+      // Cek apakah password cocok
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password dan konfirmasi password tidak cocok.'),
+            backgroundColor: Colors.red,
+          ),
         );
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-          );
-        }
+        return;
       }
+      
+      await ref.read(authNotifierProvider.notifier).signUp(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            name: _nameController.text.trim(),
+            role: _selectedRole,
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final authState = ref.watch(authNotifierProvider);
+    ref.listen<AsyncValue<void>>(authNotifierProvider, (_, state) {
+      if (state.hasError && !state.isLoading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.error.toString()), backgroundColor: Colors.red),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Buat Akun Baru')),
       body: SingleChildScrollView(
@@ -64,11 +81,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 16),
               CustomTextField(controller: _emailController, labelText: 'Email', keyboardType: TextInputType.emailAddress, validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
               const SizedBox(height: 16),
-              CustomTextField(controller: _passwordController, labelText: 'Password', obscureText: true, validator: (v) => v!.length < 6 ? 'Password minimal 6 karakter' : null),
+              // FITUR BARU: Lihat Password
+              CustomTextField(
+                controller: _passwordController,
+                labelText: 'Password',
+                obscureText: _obscurePassword,
+                validator: (v) => v!.length < 6 ? 'Password minimal 6 karakter' : null,
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // FITUR BARU: Konfirmasi Password
+              CustomTextField(
+                controller: _confirmPasswordController,
+                labelText: 'Konfirmasi Password',
+                obscureText: _obscureConfirmPassword,
+                validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                ),
+              ),
               const SizedBox(height: 24),
               Text('Saya ingin mendaftar sebagai:', style: Theme.of(context).textTheme.titleMedium),
               ...UserRole.values
-                  .where((role) => role != UserRole.admin) // Sembunyikan role admin
+                  .where((role) => role != UserRole.admin) 
                   .map((role) => RadioListTile<UserRole>(
                         title: Text(role == UserRole.penjual ? 'Penjual' : 'Pembeli'),
                         value: role,
@@ -77,8 +116,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       )),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: authState is AsyncLoading ? null : _submit,
-                child: authState is AsyncLoading ? const LoadingWidget() : const Text('Daftar'),
+                onPressed: authState.isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                child: authState.isLoading ? const LoadingWidget() : const Text('Daftar'),
               ),
               TextButton(
                 onPressed: () => context.go('/login'),

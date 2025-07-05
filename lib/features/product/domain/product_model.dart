@@ -8,10 +8,7 @@ class ProductModel {
     required this.price,
     required this.description,
     required this.location,
-    this.imageUrl,
-    required this.waNumber,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.waNumber, required this.createdAt, required this.updatedAt, this.imageUrl,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {

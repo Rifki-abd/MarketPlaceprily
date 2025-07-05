@@ -3,16 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:marketplace_app/features/auth/domain/user_model.dart';
-import 'package:marketplace_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:marketplace_app/features/cart/presentation/providers/cart_provider.dart';
-import 'package:marketplace_app/shared/widgets/empty_state_widget.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
-import 'package:marketplace_app/features/product/presentation/providers/product_provider.dart';
-import 'package:marketplace_app/features/product/presentation/widgets/product_card.dart';
+import 'package:preloft_app/features/auth/domain/user_model.dart';
+import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/features/product/presentation/providers/product_provider.dart';
+import 'package:preloft_app/features/product/presentation/widgets/product_card.dart';
+import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart';
 
-/// ## Home Screen
-/// Layar utama yang menampilkan daftar semua produk yang tersedia.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -24,14 +22,15 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace'),
+        title: const Text('Preloft'),
         actions: [
-          // Tombol Keranjang
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () => context.go('/cart'),
+                icon: const Icon(Icons.shopping_cart_outlined),
+                tooltip: 'Keranjang',
+                // PASTIKAN INI MENGGUNAKAN PUSH
+                onPressed: () => context.push('/cart'),
               ),
               if (cartItemCount > 0)
                 Positioned(
@@ -53,10 +52,10 @@ class HomeScreen extends ConsumerWidget {
                 ),
             ],
           ),
-          // Tombol Profil
           IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.go('/profile'),
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profil',
+            onPressed: () => context.push('/profile'),
           ),
         ],
       ),
@@ -66,7 +65,7 @@ class HomeScreen extends ConsumerWidget {
             return EmptyStateWidget(
               title: 'Belum Ada Produk',
               message: 'Jadilah yang pertama untuk menjual barang di sini!',
-              icon: Icons.storefront, // FIX: Menambahkan ikon yang hilang
+              icon: Icons.storefront,
               onRefresh: () => ref.invalidate(allProductsStreamProvider),
             );
           }
@@ -83,14 +82,15 @@ class HomeScreen extends ConsumerWidget {
           child: EmptyStateWidget(
             title: 'Oops, Terjadi Kesalahan',
             message: err.toString(),
-            icon: Icons.error_outline, // FIX: Menambahkan ikon yang hilang
+            icon: Icons.error_outline,
             onRefresh: () => ref.invalidate(allProductsStreamProvider),
           ),
         ),
       ),
       floatingActionButton: userProfile?.role == UserRole.penjual
           ? FloatingActionButton(
-              onPressed: () => context.go('/add-product'),
+              onPressed: () => context.push('/add-product'),
+              tooltip: 'Tambah Produk',
               child: const Icon(Icons.add),
             )
           : null,

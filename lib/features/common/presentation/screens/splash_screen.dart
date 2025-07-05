@@ -1,12 +1,8 @@
 // lib/features/common/presentation/screens/splash_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:marketplace_app/shared/widgets/loading_widget.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart';
 
-/// ## Splash Screen
-///
-/// Tampilan awal yang muncul saat aplikasi sedang memuat
-/// data awal atau memeriksa status autentikasi.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
@@ -21,7 +17,7 @@ class SplashScreen extends StatelessWidget {
             Icon(Icons.shopping_bag, size: 80, color: Colors.white),
             SizedBox(height: 24),
             Text(
-              'Marketplace',
+              'Preloft',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -29,7 +25,7 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 48),
-            LoadingWidget(message: 'Memuat...'), // FIX: Menghapus parameter color
+            LoadingWidget(message: 'Memuat...'),
           ],
         ),
       ),
