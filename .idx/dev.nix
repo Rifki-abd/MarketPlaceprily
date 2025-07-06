@@ -7,8 +7,7 @@
     pkgs.flutter
     pkgs.git
     pkgs.openssh
-    pkgs.python311Packages.pip
-    pkgs.python311Packages.git-filter-repo
+    pkgs.git-filter-repo
   ];
 
   idx.extensions = [
