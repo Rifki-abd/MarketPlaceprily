@@ -7,7 +7,11 @@
     pkgs.flutter
     pkgs.git
     pkgs.openssh
-    pkgs.git-filter-repo
+    pkgs.cmake
+    pkgs.clang
+    pkgs.ninja
+    pkgs.pkg-config
+    pkgs.chromium  # Pengganti Chrome
   ];
 
   idx.extensions = [
