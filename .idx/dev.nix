@@ -11,7 +11,8 @@
     pkgs.clang
     pkgs.ninja
     pkgs.pkg-config
-    pkgs.chromium  # Pengganti Chrome
+    pkgs.gtk3           # ✅ Tambahkan ini
+    pkgs.chromium       # ✅ Untuk Flutter Web
   ];
 
   idx.extensions = [
