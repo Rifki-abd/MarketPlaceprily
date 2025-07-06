@@ -6,7 +6,7 @@
   packages = with pkgs; [
     flutter
     git
-    openssh
+    openssh  # ← ini penting agar ssh-keygen bisa dijalankan
   ];
 
   idx.extensions = [
