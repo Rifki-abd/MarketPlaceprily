@@ -4,15 +4,13 @@
   channel = "stable-24.05";
   packages = [
     pkgs.flutter
-    pkgs.openssh
     pkgs.git
+    pkgs.openssh
   ];
 
   idx.extensions = [
     "dart-code.flutter"
   ];
 
-  idx.previews = {
-    enable = true;
-  };
+  idx.previews.enable = true;
 }
