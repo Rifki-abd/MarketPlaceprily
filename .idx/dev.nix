@@ -1,13 +1,17 @@
-{pkgs}: {
+{ pkgs }:
+
+{
   channel = "stable-24.05";
-  packages = [
-    pkgs.flutter          # <-- Pastikan ini ada
-    pkgs.google-chrome    # <-- Dan ini untuk Chrome
+
+  packages = with pkgs; [
+    flutter
+    git
+    openssh
   ];
+
   idx.extensions = [
     "dart-code.flutter"
   ];
-  idx.previews = {
-    enable = true;
-  };
+
+  idx.previews.enable = true;
 }
