@@ -11,8 +11,9 @@
     pkgs.clang
     pkgs.ninja
     pkgs.pkg-config
-    pkgs.gtk3           # ✅ Tambahkan ini
-    pkgs.chromium       # ✅ Untuk Flutter Web
+    pkgs.gtk3         # ✅ Penting untuk Linux build
+    pkgs.chromium     # ✅ Untuk Flutter web
+    pkgs.mesa         # ✅ Untuk eglinfo (opsional tapi penting)
   ];
 
   idx.extensions = [
