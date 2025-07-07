@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:preloft_app/core/providers/supabase_provider.dart';
+import 'package:preloft_app/features/admin/presentation/providers/admin_provider.dart';
+import 'package:preloft_app/features/auth/domain/user_model.dart';
+import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:preloft_app/features/chat/data/chat_repository.dart';
 import 'package:preloft_app/features/product/domain/product_model.dart';
@@ -17,10 +20,10 @@ class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({required this.productId, super.key});
   final String productId;
 
+  // ... (fungsi _launchWhatsApp dan _startChat tidak berubah)
   Future<void> _launchWhatsApp(BuildContext context, String waNumber) async {
     final number = waNumber.startsWith('62') ? waNumber : '62${waNumber.substring(1)}';
     final url = Uri.parse('https://wa.me/$number');
-    
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -30,7 +33,6 @@ class ProductDetailScreen extends ConsumerWidget {
     }
   }
 
-  // Fungsi untuk memulai chat
   Future<void> _startChat(BuildContext context, WidgetRef ref, ProductModel product) async {
     final currentUser = ref.read(supabaseClientProvider).auth.currentUser;
     if (currentUser == null) {
@@ -39,15 +41,12 @@ class ProductDetailScreen extends ConsumerWidget {
       );
       return;
     }
-
-    // Mencegah penjual chat dengan diri sendiri
     if (currentUser.id == product.sellerId) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Anda tidak bisa chat untuk produk Anda sendiri')),
       );
       return;
     }
-
     try {
       final chatRepository = ChatRepository(ref.read(supabaseClientProvider));
       final chatRoomId = await chatRepository.startOrGetChatRoom(
@@ -55,12 +54,7 @@ class ProductDetailScreen extends ConsumerWidget {
         sellerId: product.sellerId,
         productId: product.id,
       );
-      
-      // Navigasi ke layar chat
-      if (context.mounted) {
-        context.push('/chat/$chatRoomId');
-      }
-
+      if (context.mounted) context.push('/chat/$chatRoomId');
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,8 +64,48 @@ class ProductDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _adminDeleteProduct(BuildContext context, WidgetRef ref, String productId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi Hapus'),
+        content: const Text('Anda yakin ingin menghapus produk ini secara permanen? Tindakan ini tidak bisa dibatalkan.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Ya, Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await ref.read(adminActionNotifierProvider.notifier)
+          .deleteProductAsAdmin(productId: productId);
+      if (success && context.mounted) {
+        context.pop();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // --- PERBAIKAN: Menambahkan listener untuk menampilkan error ---
+    ref.listen<AsyncValue<void>>(adminActionNotifierProvider, (_, state) {
+      if (state.hasError && !state.isLoading) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    });
+
+    final productAsync = ref.watch(productByIdProvider(productId));
+    // Kita akan menggunakan allProductsStreamProvider untuk memastikan data selalu ada
     final allProductsAsync = ref.watch(allProductsStreamProvider);
 
     return Scaffold(
@@ -83,14 +117,14 @@ class ProductDetailScreen extends ConsumerWidget {
           ProductModel? product;
           try {
             product = products.firstWhere((p) => p.id == productId);
-          } catch (e) {
+          } catch (_) {
             product = null;
           }
 
           if (product == null) {
             return const EmptyStateWidget(
               title: 'Produk Tidak Ditemukan',
-              message: 'Produk yang Anda cari mungkin telah dihapus atau tidak tersedia.',
+              message: 'Produk yang Anda cari mungkin telah dihapus.',
               icon: Icons.search_off,
             );
           }
@@ -102,7 +136,6 @@ class ProductDetailScreen extends ConsumerWidget {
             title: 'Gagal Memuat Produk',
             message: err.toString(),
             icon: Icons.error_outline,
-            onRefresh: () => ref.invalidate(allProductsStreamProvider),
           ),
         ),
       ),
@@ -120,7 +153,6 @@ class ProductDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ... (UI Detail Produk lainnya tetap sama)
                 Container(
                   height: 250,
                   width: double.infinity,
@@ -182,6 +214,30 @@ class ProductDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildBottomBar(BuildContext context, WidgetRef ref, ProductModel product) {
+    final userRole = ref.watch(userProfileProvider).value?.role;
+    final adminActionState = ref.watch(adminActionNotifierProvider);
+
+    if (userRole == UserRole.admin) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: adminActionState.isLoading ? null : () => _adminDeleteProduct(context, ref, product.id),
+          icon: adminActionState.isLoading 
+              ? const SizedBox.shrink() 
+              : const Icon(Icons.delete_forever_outlined),
+          label: adminActionState.isLoading 
+              ? const LoadingWidget() 
+              : const Text('Hapus Produk (Admin)'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.shade700,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 50),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

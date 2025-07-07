@@ -5,8 +5,9 @@ import 'package:preloft_app/core/providers/supabase_provider.dart';
 import 'package:preloft_app/features/admin/data/admin_repository.dart';
 import 'package:preloft_app/features/admin/domain/admin_statistics_model.dart';
 import 'package:preloft_app/features/auth/domain/user_model.dart';
+import 'package:preloft_app/features/product/presentation/providers/product_provider.dart'; // Import product provider
 
-// (Provider lain tidak berubah)
+// ... (provider lain tidak berubah)
 final adminRepositoryProvider = Provider.autoDispose<AdminRepository>((ref) {
   return AdminRepository(ref.watch(supabaseClientProvider));
 });
@@ -35,7 +36,6 @@ class AdminActionNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading();
     try {
       await action();
-      _ref.invalidate(allUsersProvider); // Invalidate daftar pengguna setelah aksi
       state = const AsyncData(null);
       return true;
     } catch (e, st) {
@@ -45,17 +45,25 @@ class AdminActionNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<bool> updateUserRole({required String userId, required UserRole newRole}) {
-    return _runAction(() => _ref.read(adminRepositoryProvider).updateUserRole(
-      userId: userId, 
-      newRole: newRole,
-    ),);
+    return _runAction(() async {
+      await _ref.read(adminRepositoryProvider).updateUserRole(userId: userId, newRole: newRole);
+      _ref.invalidate(allUsersProvider);
+    });
   }
 
-  // --- FUNGSI BARU UNTUK MENGUBAH PASSWORD ---
   Future<bool> changeUserPassword({required String userId, required String newPassword}) {
     return _runAction(() => _ref.read(adminRepositoryProvider).changeUserPassword(
       userId: userId, 
       newPassword: newPassword,
     ),);
+  }
+  
+  // --- FUNGSI BARU UNTUK ADMIN MENGHAPUS PRODUK ---
+  Future<bool> deleteProductAsAdmin({required String productId}) {
+    return _runAction(() async {
+      await _ref.read(adminRepositoryProvider).deleteProduct(productId: productId);
+      // Invalidate stream produk agar daftar diperbarui
+      _ref.invalidate(allProductsStreamProvider);
+    });
   }
 }
