@@ -8,6 +8,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Halaman ini sekarang hanya menampilkan UI.
+    // Semua logika navigasi telah dipindahkan kembali ke GoRouter.
     return const Scaffold(
       backgroundColor: Colors.blue,
       body: Center(

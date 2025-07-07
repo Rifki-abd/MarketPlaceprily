@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.marketplace_app"
-    compileSdk = 35
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -42,16 +42,14 @@ android {
 
     defaultConfig {
         applicationId = "com.example.marketplace_app"
-        // Gunakan operator '=' untuk sintaks modern
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
 
     buildTypes {
         release {
-            // Ganti 'signingConfig signingConfigs.debug' dengan sintaks modern
             signingConfig = signingConfigs.getByName("debug")
         }
     }

@@ -4,19 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/features/chat/data/chat_repository.dart';
 import 'package:preloft_app/features/product/domain/product_model.dart';
 import 'package:preloft_app/features/product/presentation/providers/product_provider.dart';
 import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
 import 'package:preloft_app/shared/widgets/loading_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:preloft_app/core/providers/supabase_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({required this.productId, super.key});
   final String productId;
 
   Future<void> _launchWhatsApp(BuildContext context, String waNumber) async {
-    // Menambahkan nomor negara jika tidak ada
     final number = waNumber.startsWith('62') ? waNumber : '62${waNumber.substring(1)}';
     final url = Uri.parse('https://wa.me/$number');
     
@@ -24,6 +26,46 @@ class ProductDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Tidak bisa membuka WhatsApp')),
+        );
+      }
+    }
+  }
+
+  // Fungsi untuk memulai chat
+  Future<void> _startChat(BuildContext context, WidgetRef ref, ProductModel product) async {
+    final currentUser = ref.read(supabaseClientProvider).auth.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Anda harus login untuk memulai chat')),
+      );
+      return;
+    }
+
+    // Mencegah penjual chat dengan diri sendiri
+    if (currentUser.id == product.sellerId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Anda tidak bisa chat untuk produk Anda sendiri')),
+      );
+      return;
+    }
+
+    try {
+      final chatRepository = ChatRepository(ref.read(supabaseClientProvider));
+      final chatRoomId = await chatRepository.startOrGetChatRoom(
+        buyerId: currentUser.id,
+        sellerId: product.sellerId,
+        productId: product.id,
+      );
+      
+      // Navigasi ke layar chat
+      if (context.mounted) {
+        context.push('/chat/$chatRoomId');
+      }
+
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memulai chat: $e')),
         );
       }
     }
@@ -39,14 +81,12 @@ class ProductDetailScreen extends ConsumerWidget {
       ),
       body: allProductsAsync.when(
         data: (products) {
-          // --- PERBAIKAN LOGIKA PENCARIAN PRODUK ---
           ProductModel? product;
           try {
             product = products.firstWhere((p) => p.id == productId);
           } catch (e) {
-            product = null; // Produk tidak ditemukan dalam list
+            product = null;
           }
-          // -----------------------------------------
 
           if (product == null) {
             return const EmptyStateWidget(
@@ -81,6 +121,7 @@ class ProductDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ... (UI Detail Produk lainnya tetap sama)
                 Container(
                   height: 250,
                   width: double.infinity,
@@ -154,25 +195,40 @@ class ProductDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          ref.read(cartProvider.notifier).addProduct(product);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${product.name} ditambahkan ke keranjang.'),
-              duration: const Duration(seconds: 2),
-              action: SnackBarAction(
-                label: 'Lihat',
-                onPressed: () => context.push('/cart'),
+      child: Row(
+        children: [
+          OutlinedButton(
+            onPressed: () => _startChat(context, ref, product),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 50),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+            ),
+            child: const Icon(Icons.chat_bubble_outline),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ref.read(cartProvider.notifier).addProduct(product);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${product.name} ditambahkan ke keranjang.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'Lihat',
+                      onPressed: () => context.push('/cart'),
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_shopping_cart),
+              label: const Text('Tambah ke Keranjang'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
               ),
             ),
-          );
-        },
-        icon: const Icon(Icons.add_shopping_cart),
-        label: const Text('Tambah ke Keranjang'),
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -41,10 +41,9 @@ class AuthRepository {
           'name': name,
           'role': role.name,
           'wa_number': waNumber,
-        }
+        },
       );
     } on AuthException catch (e) {
-      // PERBAIKAN: Melempar error yang lebih spesifik
       throw Exception('Gagal mendaftar: ${e.message}');
     } catch (e) {
       throw Exception('Terjadi kesalahan tak terduga saat mendaftar.');
@@ -58,6 +57,18 @@ class AuthRepository {
       throw Exception('Gagal login: ${e.message}');
     } catch (e) {
       throw Exception('Terjadi kesalahan tak terduga saat login.');
+    }
+  }
+
+  // --- FUNGSI BARU UNTUK LUPA PASSWORD ---
+  Future<void> resetPasswordForEmail({required String email}) async {
+    try {
+      // Kita mengandalkan Site URL di dasbor Supabase untuk redirect
+      await _client.auth.resetPasswordForEmail(email);
+    } on AuthException catch(e) {
+      throw Exception('Gagal mengirim email reset: ${e.message}');
+    } catch (e) {
+      throw Exception('Terjadi kesalahan tak terduga.');
     }
   }
 

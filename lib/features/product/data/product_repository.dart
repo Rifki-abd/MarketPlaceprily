@@ -1,31 +1,45 @@
 // lib/features/product/data/product_repository.dart
 
-import 'dart:io';
-
-import 'package:preloft_app/features/product/domain/product_model.dart';
+import 'dart:typed_data'; // Diperlukan untuk Uint8List
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:preloft_app/features/product/domain/product_model.dart';
 
 class ProductRepository {
   ProductRepository(this._client);
   final SupabaseClient _client;
 
-  // Fungsi untuk upload gambar (Tidak berubah)
+  /// Mengunggah gambar produk menggunakan kontennya (bytes).
   Future<String> uploadProductImage({
-    required File image,
+    required Uint8List imageBytes,
+    required String fileName,
     required String productId,
   }) async {
     try {
-      final imageExtension = image.path.split('.').last.toLowerCase();
-      final imagePath = '/$productId/product.$imageExtension';
+      final imageExtension = fileName.split('.').last.toLowerCase();
       
-      await _client.storage.from('product-images').upload(imagePath, image);
-      return _client.storage.from('product-images').getPublicUrl(imagePath);
+      // --- PERBAIKAN DI SINI ---
+      // Mengoreksi ekstensi 'jpg' menjadi 'jpeg' untuk tipe MIME yang valid.
+      final mimeTypeExtension = imageExtension == 'jpg' ? 'jpeg' : imageExtension;
+      
+      final uploadPath = '/$productId/product.$imageExtension';
+
+      await _client.storage.from('product-images').uploadBinary(
+            uploadPath,
+            imageBytes,
+            fileOptions: FileOptions(
+              // Gunakan tipe MIME yang sudah dikoreksi
+              contentType: 'image/$mimeTypeExtension',
+              upsert: true,
+            ),
+          );
+      
+      return _client.storage.from('product-images').getPublicUrl(uploadPath);
     } catch (e) {
       throw Exception('Gagal mengunggah gambar: $e');
     }
   }
 
-  // Fungsi untuk menyimpan data produk ke database
+  // Fungsi lain tidak berubah
   Future<void> createProduct(Map<String, dynamic> data) async {
     try {
       await _client.from('products').insert(data);
@@ -33,9 +47,7 @@ class ProductRepository {
       throw Exception('Gagal membuat produk: $e');
     }
   }
-
-  // --- Sisa kode tidak berubah ---
-
+  
   Stream<List<ProductModel>> getAllProductsStream() {
     try {
       return _client

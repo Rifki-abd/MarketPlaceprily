@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:preloft_app/features/product/domain/product_model.dart'; // FIX: Path impor diperbaiki
+import 'package:preloft_app/features/product/domain/product_model.dart';
+import 'package:preloft_app/shared/widgets/loading_widget.dart'; // Import LoadingWidget
 
 class ProductCard extends StatelessWidget {
 
@@ -29,14 +30,27 @@ class ProductCard extends StatelessWidget {
       elevation: 3,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap ?? () => GoRouter.of(context).go('/product/${product.id}'),
+        // --- PERBAIKAN DI SINI: Menggunakan context.push() ---
+        onTap: onTap ?? () => context.push('/product/${product.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               height: 150,
+              width: double.infinity,
               color: Colors.grey.shade200,
-              child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
+              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      product.imageUrl!,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: LoadingWidget());
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                    )
+                  : const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
             ),
             Padding(
               padding: const EdgeInsets.all(12),

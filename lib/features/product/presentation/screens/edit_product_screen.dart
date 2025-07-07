@@ -100,31 +100,31 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
                   CustomTextField(
                       controller: _nameController,
                       labelText: 'Nama Produk',
-                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,),
                   const SizedBox(height: 16),
                   CustomTextField(
                       controller: _priceController,
                       labelText: 'Harga',
                       keyboardType: TextInputType.number,
-                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,),
                   const SizedBox(height: 16),
                   CustomTextField(
                       controller: _descriptionController,
                       labelText: 'Deskripsi',
                       maxLines: 4,
-                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,),
                   const SizedBox(height: 16),
                   CustomTextField(
                       controller: _locationController,
                       labelText: 'Lokasi',
-                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null),
+                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: state.isLoading ? null : _submit,
                     child: state.isLoading
                         ? const LoadingWidget()
                         : const Text('Simpan Perubahan'),
-                  )
+                  ),
                 ],
               ),
             ),

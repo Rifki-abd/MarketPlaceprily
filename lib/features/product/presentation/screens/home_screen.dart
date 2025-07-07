@@ -24,12 +24,17 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Preloft'),
         actions: [
+          // --- Tombol Kotak Masuk Baru ---
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            tooltip: 'Kotak Masuk',
+            onPressed: () => context.push('/chats'),
+          ),
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
                 tooltip: 'Keranjang',
-                // PASTIKAN INI MENGGUNAKAN PUSH
                 onPressed: () => context.push('/cart'),
               ),
               if (cartItemCount > 0)

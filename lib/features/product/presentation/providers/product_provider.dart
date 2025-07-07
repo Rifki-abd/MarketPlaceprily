@@ -1,7 +1,6 @@
 // lib/features/product/presentation/providers/product_provider.dart
 
-import 'dart:io';
-
+import 'dart:typed_data'; // Diperlukan untuk Uint8List
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preloft_app/core/providers/supabase_provider.dart';
 import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
@@ -51,21 +50,23 @@ class ProductActionNotifier extends StateNotifier<AsyncValue<void>> {
   final ProductRepository _repository;
   final Ref _ref;
 
-  // PERBAIKAN: Fungsi ini sekarang menerima data dan gambar
-  Future<bool> createProduct(Map<String, dynamic> data, File image) async {
+  // --- PERBAIKAN DI SINI ---
+  // Menerima data produk, konten gambar (bytes), dan nama file
+  Future<bool> createProduct(Map<String, dynamic> data, Uint8List imageBytes, String fileName) async {
     state = const AsyncLoading();
     try {
-      // 1. Generate ID unik untuk produk baru
       final productId = const Uuid().v4();
       
-      // 2. Upload gambar terlebih dahulu
-      final imageUrl = await _repository.uploadProductImage(image: image, productId: productId);
+      // Upload gambar menggunakan bytes dan nama file
+      final imageUrl = await _repository.uploadProductImage(
+        imageBytes: imageBytes,
+        fileName: fileName,
+        productId: productId
+      );
 
-      // 3. Tambahkan ID dan URL gambar ke data produk
       data['id'] = productId;
       data['image_url'] = imageUrl;
 
-      // 4. Simpan data produk yang sudah lengkap ke database
       await _repository.createProduct(data);
       
       _ref.invalidate(allProductsStreamProvider);

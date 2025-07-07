@@ -88,14 +88,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
+                      ),
                     )
                   else
                     IconButton(
                       icon: Icon(_isEditing ? Icons.save_alt_outlined : Icons.edit_outlined),
                       onPressed: () => _isEditing ? _updateProfile() : _toggleEdit(user),
                       tooltip: _isEditing ? 'Simpan' : 'Edit Profil',
-                    )
+                    ),
                 ]
               : [],
           loading: () => [],
@@ -104,8 +104,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       body: userProfileAsync.when(
         data: (user) {
+          // --- PERBAIKAN DI SINI ---
+          // Jika pengguna null (misalnya, saat proses logout), tampilkan loading
+          // untuk mencegah crash dan memberi waktu bagi router untuk bernavigasi.
           if (user == null) {
-            return const Center(child: Text('Pengguna tidak ditemukan. Silakan login kembali.'));
+            return const Center(child: LoadingWidget(message: 'Keluar...'));
           }
           if (!_isEditing) {
               _initializeControllers(user);
@@ -128,11 +131,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (user.role == UserRole.penjual) ...[
           ElevatedButton.icon(
             onPressed: () => context.push('/my-products'),
-            // PERBAIKAN: Menambahkan 'const'
             icon: const Icon(Icons.storefront_outlined),
             label: const Text('Produk Saya'),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12)
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
           const SizedBox(height: 8),
@@ -141,13 +143,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (user.role == UserRole.admin) ...[
           ElevatedButton.icon(
             onPressed: () => context.push('/admin'),
-            // PERBAIKAN: Menambahkan 'const'
             icon: const Icon(Icons.dashboard_customize_outlined),
             label: const Text('Admin Dashboard'),
              style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-              padding: const EdgeInsets.symmetric(vertical: 12)
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
           const SizedBox(height: 8),
@@ -160,9 +161,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red.shade700, 
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12)
+            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
-          // PERBAIKAN: Menambahkan 'const'
           icon: const Icon(Icons.logout),
           label: const Text('Logout'),
         ),
@@ -181,31 +181,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   List<Widget> _buildDisplayFields(UserModel user) {
     return [
       ListTile(
-        // PERBAIKAN: Menambahkan 'const'
         leading: const Icon(Icons.person_outline), 
         title: const Text('Nama'), 
-        subtitle: Text(user.name, style: Theme.of(context).textTheme.titleMedium)
+        subtitle: Text(user.name, style: Theme.of(context).textTheme.titleMedium),
       ),
       const Divider(),
       ListTile(
-        // PERBAIKAN: Menambahkan 'const'
         leading: const Icon(Icons.email_outlined), 
         title: const Text('Email'), 
-        subtitle: Text(user.email, style: Theme.of(context).textTheme.titleMedium)
+        subtitle: Text(user.email, style: Theme.of(context).textTheme.titleMedium),
       ),
       const Divider(),
       ListTile(
-        // PERBAIKAN: Menambahkan 'const'
         leading: const Icon(Icons.phone_outlined), 
         title: const Text('Nomor WhatsApp'), 
-        subtitle: Text(user.waNumber ?? 'Belum diatur', style: Theme.of(context).textTheme.titleMedium)
+        subtitle: Text(user.waNumber ?? 'Belum diatur', style: Theme.of(context).textTheme.titleMedium),
       ),
       const Divider(),
       ListTile(
-        // PERBAIKAN: Menambahkan 'const'
         leading: const Icon(Icons.badge_outlined), 
         title: const Text('Role'), 
-        subtitle: Text(user.role.name.substring(0, 1).toUpperCase() + user.role.name.substring(1), style: Theme.of(context).textTheme.titleMedium)
+        subtitle: Text(user.role.name.substring(0, 1).toUpperCase() + user.role.name.substring(1), style: Theme.of(context).textTheme.titleMedium),
       ),
     ];
   }
