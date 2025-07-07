@@ -18,6 +18,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
+  // --- STATE BARU UNTUK VISIBILITAS PASSWORD ---
+  bool _isPasswordVisible = false;
 
   @override
   void dispose() {
@@ -29,7 +32,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     
-    // Kita tidak perlu menunggu hasilnya, karena router akan menangani navigasi
     await ref.read(authNotifierProvider.notifier).signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -77,14 +79,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   validator: (val) => val!.isEmpty ? 'Email tidak boleh kosong' : null,
                 ),
                 const SizedBox(height: 16),
+                // --- PERBAIKAN PADA FIELD PASSWORD ---
                 CustomTextField(
                   controller: _passwordController,
                   labelText: 'Password',
                   prefixIcon: Icons.lock_outline,
-                  obscureText: true,
+                  obscureText: !_isPasswordVisible, // Kontrol visibilitas
                   validator: (val) => val!.isEmpty ? 'Password tidak boleh kosong' : null,
+                  suffixIcon: IconButton(
+                    icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                // --- TOMBOL LUPA PASSWORD BARU ---
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(

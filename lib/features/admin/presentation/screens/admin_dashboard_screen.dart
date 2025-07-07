@@ -2,13 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:preloft_app/features/admin/presentation/providers/admin_provider.dart';
 import 'package:preloft_app/shared/widgets/loading_widget.dart';
 
-/// ## Admin Dashboard Screen
-///
-/// Layar untuk administrator yang menampilkan statistik utama aplikasi.
-/// UI ini sepenuhnya bergantung pada state dari `adminStatisticsProvider`.
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
@@ -19,80 +16,93 @@ class AdminDashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        actions: [
-          // Tombol refresh untuk memuat ulang data statistik
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(adminStatisticsProvider),
-          ),
-        ],
       ),
-      body: statsAsync.when(
-        data: (stats) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            children: [
-              _buildStatCard(
-                context,
-                icon: Icons.people,
-                label: 'Total Pengguna',
-                value: stats.userCount.toString(),
-                color: Colors.blue,
+      // --- PERBAIKAN DI SINI: Membungkus dengan SingleChildScrollView ---
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            statsAsync.when(
+              data: (stats) => GridView.count(
+                crossAxisCount: 2,
+                padding: const EdgeInsets.all(16),
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildStatCard(
+                    context,
+                    icon: Icons.people_outline,
+                    label: 'Total Pengguna',
+                    value: stats.userCount.toString(),
+                    color: Colors.blue,
+                  ),
+                  _buildStatCard(
+                    context,
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Total Produk',
+                    value: stats.productCount.toString(),
+                    color: Colors.green,
+                  ),
+                  _buildStatCard(
+                    context,
+                    icon: Icons.receipt_long_outlined,
+                    label: 'Total Pesanan',
+                    value: stats.orderCount.toString(),
+                    color: Colors.orange,
+                  ),
+                ],
               ),
-              _buildStatCard(
-                context,
-                icon: Icons.inventory_2,
-                label: 'Total Produk',
-                value: stats.productCount.toString(),
-                color: Colors.green,
-              ),
-            ],
-          ),
-        ),
-        loading: () => const Center(child: LoadingWidget(message: 'Memuat statistik...')),
-        error: (err, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Gagal memuat data: $err'),
-          ),
+              loading: () => const Center(child: Padding(
+                padding: EdgeInsets.all(16),
+                child: LoadingWidget(message: 'Memuat statistik...'),
+              ),),
+              error: (err, stack) => Center(child: Text('Error: $err')),
+            ),
+            const Divider(height: 32),
+            ListTile(
+              leading: const Icon(Icons.manage_accounts_outlined),
+              title: const Text('Kelola Pengguna'),
+              subtitle: const Text('Lihat semua pengguna dan ubah peran mereka'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/admin/users'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Pengaturan Lainnya'),
+              subtitle: const Text('Fitur admin lainnya akan muncul di sini'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {},
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context, {
+  Widget _buildStatCard(BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
     required Color color,
   }) {
-    final textTheme = Theme.of(context).textTheme;
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 48, color: color),
+          const SizedBox(height: 16),
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+          ),
+        ],
       ),
     );
   }

@@ -104,9 +104,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       body: userProfileAsync.when(
         data: (user) {
-          // --- PERBAIKAN DI SINI ---
-          // Jika pengguna null (misalnya, saat proses logout), tampilkan loading
-          // untuk mencegah crash dan memberi waktu bagi router untuk bernavigasi.
           if (user == null) {
             return const Center(child: LoadingWidget(message: 'Keluar...'));
           }
@@ -126,8 +123,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         if (_isEditing) ..._buildEditFields() else ..._buildDisplayFields(user),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
+        const Divider(),
+        const SizedBox(height: 16),
         
+        // --- PERBAIKAN DI SINI ---
+        ListTile(
+          leading: const Icon(Icons.password_outlined),
+          title: const Text('Ubah Password'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/profile/change-password'),
+        ),
+        const Divider(),
+        
+        const SizedBox(height: 16),
         if (user.role == UserRole.penjual) ...[
           ElevatedButton.icon(
             onPressed: () => context.push('/my-products'),

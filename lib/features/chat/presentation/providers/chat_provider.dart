@@ -24,7 +24,7 @@ final totalUnreadMessagesProvider = Provider.autoDispose<int>((ref) {
   return chatListAsync.when(
     data: (chats) {
       if (currentUserId == null) return 0;
-      int total = 0;
+      var total = 0;
       for (final chat in chats) {
         if (chat.buyerId == currentUserId) {
           total += chat.buyerUnreadCount;
@@ -65,7 +65,7 @@ class ChatActionNotifier extends StateNotifier<AsyncValue<void>> {
       await _repository.sendMessage(
         chatRoomId: chatRoomId, 
         senderId: senderId, 
-        content: content
+        content: content,
       );
       _ref.invalidate(messagesStreamProvider(chatRoomId));
       _ref.invalidate(chatRoomListStreamProvider);

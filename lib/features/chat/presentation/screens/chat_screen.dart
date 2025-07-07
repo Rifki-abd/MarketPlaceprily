@@ -111,7 +111,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildMessageInput(bool isSending) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [
@@ -135,12 +135,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 onSubmitted: isSending ? null : (_) => _sendMessage(),
               ),
             ),
-            isSending
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
+            if (isSending) const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
                   child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator()),
-                )
-              : IconButton(
+                ) else IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: _sendMessage,
                 ),

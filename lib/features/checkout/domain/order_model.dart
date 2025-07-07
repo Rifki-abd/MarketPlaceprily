@@ -4,12 +4,6 @@ import 'package:preloft_app/features/cart/domain/cart_item_model.dart';
 
 // Merepresentasikan satu baris di tabel 'orders'
 class OrderModel {
-  final String id;
-  final String userId;
-  final double totalPrice;
-  final String status;
-  final DateTime createdAt;
-  final List<OrderItemModel> items;
 
   OrderModel({
     required this.id,
@@ -19,15 +13,16 @@ class OrderModel {
     required this.createdAt,
     this.items = const [],
   });
+  final String id;
+  final String userId;
+  final double totalPrice;
+  final String status;
+  final DateTime createdAt;
+  final List<OrderItemModel> items;
 }
 
 // Merepresentasikan satu baris di tabel 'order_items'
 class OrderItemModel {
-  final String id;
-  final String orderId;
-  final String productId;
-  final int quantity;
-  final double pricePerItem;
 
   OrderItemModel({
     required this.id,
@@ -47,4 +42,9 @@ class OrderItemModel {
       pricePerItem: cartItem.product.price,
     );
   }
+  final String id;
+  final String orderId;
+  final String productId;
+  final int quantity;
+  final double pricePerItem;
 }

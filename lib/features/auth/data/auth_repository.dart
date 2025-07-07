@@ -14,6 +14,7 @@ class AuthRepository {
   User? get currentUser => _client.auth.currentUser;
   
   Stream<UserModel?> getUserProfile(String userId) {
+    // ... (tidak berubah)
     return _client
         .from('users')
         .stream(primaryKey: ['id'])
@@ -33,6 +34,7 @@ class AuthRepository {
     required UserRole role,
     String? waNumber,
   }) async {
+    // ... (tidak berubah)
     try {
       await _client.auth.signUp(
         email: email, 
@@ -51,6 +53,7 @@ class AuthRepository {
   }
 
   Future<void> signIn({required String email, required String password}) async {
+    // ... (tidak berubah)
     try {
       await _client.auth.signInWithPassword(email: email, password: password);
     } on AuthException catch (e) {
@@ -60,10 +63,9 @@ class AuthRepository {
     }
   }
 
-  // --- FUNGSI BARU UNTUK LUPA PASSWORD ---
   Future<void> resetPasswordForEmail({required String email}) async {
+    // ... (tidak berubah)
     try {
-      // Kita mengandalkan Site URL di dasbor Supabase untuk redirect
       await _client.auth.resetPasswordForEmail(email);
     } on AuthException catch(e) {
       throw Exception('Gagal mengirim email reset: ${e.message}');
@@ -71,8 +73,22 @@ class AuthRepository {
       throw Exception('Terjadi kesalahan tak terduga.');
     }
   }
+  
+  // --- FUNGSI BARU UNTUK UBAH PASSWORD ---
+  Future<void> changePassword({required String newPassword}) async {
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } on AuthException catch(e) {
+      throw Exception('Gagal mengubah password: ${e.message}');
+    } catch (e) {
+      throw Exception('Terjadi kesalahan tak terduga.');
+    }
+  }
 
   Future<void> signOut() async {
+    // ... (tidak berubah)
     try {
       await _client.auth.signOut();
     } on AuthException catch (e) {

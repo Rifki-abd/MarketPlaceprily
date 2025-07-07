@@ -8,14 +8,9 @@ class ChatRoomDetail {
     required this.buyerId,
     required this.sellerId,
     required this.createdAt,
-    this.lastMessage,
+    required this.productName, required this.buyerName, required this.sellerName, required this.buyerUnreadCount, required this.sellerUnreadCount, this.lastMessage,
     this.lastMessageAt,
-    required this.productName,
     this.productImageUrl,
-    required this.buyerName,
-    required this.sellerName,
-    required this.buyerUnreadCount,
-    required this.sellerUnreadCount,
   });
 
   factory ChatRoomDetail.fromMap(Map<String, dynamic> map) {
