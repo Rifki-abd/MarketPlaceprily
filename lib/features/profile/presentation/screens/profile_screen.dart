@@ -103,17 +103,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
       body: userProfileAsync.when(
+        loading: () => const Center(child: LoadingWidget(message: 'Memuat profil...')),
+        error: (err, stack) => Center(child: Text('Error: $err')),
         data: (user) {
           if (user == null) {
-            return const Center(child: LoadingWidget(message: 'Keluar...'));
+            // Jika pengguna tidak ditemukan, tampilkan pesan DAN jalan keluar.
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Pengguna tidak ditemukan atau sesi tidak valid.'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Secara paksa logout dan kembali ke halaman login
+                      await ref.read(authNotifierProvider.notifier).signOut();
+                      if (context.mounted) context.go('/login');
+                    },
+                    child: const Text('Kembali ke Login'),
+                  )
+                ],
+              ),
+            );
           }
+          
           if (!_isEditing) {
               _initializeControllers(user);
           }
+          
           return _buildProfileView(user);
         },
-        loading: () => const Center(child: LoadingWidget(message: 'Memuat profil...')),
-        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
@@ -127,7 +146,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const Divider(),
         const SizedBox(height: 16),
         
-        // --- PERBAIKAN DI SINI ---
         ListTile(
           leading: const Icon(Icons.password_outlined),
           title: const Text('Ubah Password'),
