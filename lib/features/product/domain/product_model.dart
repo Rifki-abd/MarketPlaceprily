@@ -1,16 +1,6 @@
 // lib/features/product/domain/product_model.dart
 
-class ProductModel {
-  final String id;
-  final String name;
-  final String description;
-  final double price;
-  final String location;
-  final String sellerName;
-  final String waNumber;
-  final String? imageUrl;
-  final DateTime createdAt;
-  final String sellerId; // <-- FIELD PENTING DITAMBAHKAN
+class ProductModel { // <-- FIELD PENTING DITAMBAHKAN
 
   ProductModel({
     required this.id,
@@ -39,6 +29,16 @@ class ProductModel {
       sellerId: map['seller_id'] as String, // <-- MEMBACA DARI DATABASE
     );
   }
+  final String id;
+  final String name;
+  final String description;
+  final double price;
+  final String location;
+  final String sellerName;
+  final String waNumber;
+  final String? imageUrl;
+  final DateTime createdAt;
+  final String sellerId;
 
   Map<String, dynamic> toMap() {
     return {

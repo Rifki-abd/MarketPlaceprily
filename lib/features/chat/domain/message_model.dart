@@ -1,11 +1,6 @@
 // lib/features/chat/domain/message_model.dart
 
 class Message {
-  final String id;
-  final String chatroomId;
-  final String senderId;
-  final String content;
-  final DateTime createdAt;
 
   Message({
     required this.id,
@@ -25,4 +20,9 @@ class Message {
       createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
+  final String id;
+  final String chatroomId;
+  final String senderId;
+  final String content;
+  final DateTime createdAt;
 }

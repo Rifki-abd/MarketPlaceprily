@@ -13,6 +13,7 @@ class ChatRepository {
     required String sellerId,
     required String productId,
   }) async {
+    // ... (tidak berubah)
     try {
       final data = await _client.rpc('start_or_get_chat_room', params: {
         'p_buyer_id': buyerId,
@@ -30,6 +31,7 @@ class ChatRepository {
     required String senderId,
     required String content,
   }) async {
+    // ... (tidak berubah)
     try {
       await _client.from('messages').insert({
         'chat_room_id': chatRoomId,
@@ -40,8 +42,25 @@ class ChatRepository {
       throw Exception('Gagal mengirim pesan: $e');
     }
   }
+  
+  // --- FUNGSI BARU UNTUK MERESET HITUNGAN ---
+  Future<void> resetUnreadCount({
+    required String chatRoomId,
+    required String userId,
+  }) async {
+    try {
+      await _client.rpc('reset_unread_count', params: {
+        'p_chat_room_id': chatRoomId,
+        'p_user_id': userId,
+      });
+    } catch (e) {
+      // Kita tidak perlu melempar error di sini karena ini adalah operasi latar belakang
+      print('Gagal mereset unread count: $e');
+    }
+  }
 
   Stream<List<Message>> getMessagesStream(String chatRoomId) {
+    // ... (tidak berubah)
     try {
       return _client
           .from('messages')
@@ -54,8 +73,8 @@ class ChatRepository {
     }
   }
   
-  /// Mendapatkan stream daftar chat room dari VIEW 'chat_room_details'.
   Stream<List<ChatRoomDetail>> getChatRoomListStream() {
+    // ... (tidak berubah)
     try {
       return _client
           .from('chat_room_details')

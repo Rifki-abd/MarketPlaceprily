@@ -19,6 +19,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _messageController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Gunakan 'addPostFrameCallback' untuk memanggil provider setelah build pertama selesai.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Panggil aksi untuk menandai sebagai sudah dibaca saat layar dibuka
+      ref.read(chatActionNotifierProvider.notifier).markAsRead(widget.chatRoomId);
+    });
+  }
+
+  @override
   void dispose() {
     _messageController.dispose();
     super.dispose();
@@ -38,7 +48,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
     
     _messageController.clear();
-    FocusScope.of(context).unfocus(); // Tutup keyboard setelah mengirim
+    FocusScope.of(context).unfocus();
   }
 
   @override

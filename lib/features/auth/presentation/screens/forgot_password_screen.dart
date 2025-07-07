@@ -31,7 +31,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     
     // Kita akan menggunakan AuthNotifier yang sama, tetapi memanggil fungsi yang berbeda
     final success = await ref.read(authNotifierProvider.notifier).runAction(
-      () => ref.read(authRepositoryProvider).resetPasswordForEmail(email: email)
+      () => ref.read(authRepositoryProvider).resetPasswordForEmail(email: email),
     );
 
     if (success && mounted) {

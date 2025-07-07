@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:preloft_app/features/auth/domain/user_model.dart';
 import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:preloft_app/features/chat/presentation/providers/chat_provider.dart'; // Import chat provider
 import 'package:preloft_app/features/product/presentation/providers/product_provider.dart';
 import 'package:preloft_app/features/product/presentation/widgets/product_card.dart';
 import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
@@ -19,16 +20,39 @@ class HomeScreen extends ConsumerWidget {
     final productsAsync = ref.watch(allProductsStreamProvider);
     final userProfile = ref.watch(userProfileProvider).value;
     final cartItemCount = ref.watch(cartItemCountProvider);
+    final totalUnreadMessages = ref.watch(totalUnreadMessagesProvider); // Tonton total pesan belum dibaca
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preloft'),
         actions: [
-          // --- Tombol Kotak Masuk Baru ---
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            tooltip: 'Kotak Masuk',
-            onPressed: () => context.push('/chats'),
+          // --- LENCANA NOTIFIKASI DI SINI ---
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chat_bubble_outline),
+                tooltip: 'Kotak Masuk',
+                onPressed: () => context.push('/chats'),
+              ),
+              if (totalUnreadMessages > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      totalUnreadMessages.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           Stack(
             children: [

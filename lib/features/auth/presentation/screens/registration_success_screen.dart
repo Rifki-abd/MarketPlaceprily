@@ -7,7 +7,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
   const RegistrationSuccessScreen({
     required this.email,
     this.isReset = false,
-    super.key
+    super.key,
   });
   final String email;
   final bool isReset;
@@ -32,7 +32,7 @@ Silakan klik tautan tersebut untuk mengaktifkan akun Anda.''';
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

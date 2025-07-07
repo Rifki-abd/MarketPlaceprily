@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:preloft_app/features/chat/domain/chat_room_detail_model.dart';
 import 'package:preloft_app/features/chat/presentation/providers/chat_provider.dart';
 import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
 import 'package:preloft_app/shared/widgets/loading_widget.dart';
@@ -36,6 +35,9 @@ class ChatListScreen extends ConsumerWidget {
               final chat = chats[index];
               final isMeBuyer = chat.buyerId == currentUserId;
               final otherPersonName = isMeBuyer ? chat.sellerName : chat.buyerName;
+              
+              // Tentukan jumlah pesan belum dibaca untuk chat ini
+              final unreadCount = isMeBuyer ? chat.buyerUnreadCount : chat.sellerUnreadCount;
 
               return ListTile(
                 leading: CircleAvatar(
@@ -52,6 +54,17 @@ class ChatListScreen extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                // --- TAMPILKAN LENCANA NOTIFIKASI ---
+                trailing: unreadCount > 0
+                  ? CircleAvatar(
+                      radius: 12,
+                      backgroundColor: Colors.red,
+                      child: Text(
+                        unreadCount.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    )
+                  : null,
                 onTap: () => context.push('/chat/${chat.id}'),
               );
             },

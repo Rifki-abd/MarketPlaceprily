@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:preloft_app/core/providers/supabase_provider.dart';
 import 'package:preloft_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:preloft_app/features/chat/data/chat_repository.dart';
 import 'package:preloft_app/features/product/domain/product_model.dart';
@@ -12,7 +12,6 @@ import 'package:preloft_app/features/product/presentation/providers/product_prov
 import 'package:preloft_app/shared/widgets/empty_state_widget.dart';
 import 'package:preloft_app/shared/widgets/loading_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:preloft_app/core/providers/supabase_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({required this.productId, super.key});

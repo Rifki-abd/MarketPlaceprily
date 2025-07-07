@@ -1,17 +1,6 @@
 // lib/features/chat/domain/chat_room_detail_model.dart
 
 class ChatRoomDetail {
-  final String id;
-  final String productId;
-  final String buyerId;
-  final String sellerId;
-  final DateTime createdAt;
-  final String? lastMessage;
-  final DateTime? lastMessageAt;
-  final String productName;
-  final String? productImageUrl;
-  final String buyerName;
-  final String sellerName;
 
   ChatRoomDetail({
     required this.id,
@@ -25,6 +14,8 @@ class ChatRoomDetail {
     this.productImageUrl,
     required this.buyerName,
     required this.sellerName,
+    required this.buyerUnreadCount,
+    required this.sellerUnreadCount,
   });
 
   factory ChatRoomDetail.fromMap(Map<String, dynamic> map) {
@@ -42,6 +33,24 @@ class ChatRoomDetail {
       productImageUrl: map['product_image_url'] as String?,
       buyerName: map['buyer_name'] as String,
       sellerName: map['seller_name'] as String,
+      
+      // --- PERBAIKAN DI SINI: Menangani nilai NULL dengan aman ---
+      // Jika 'buyer_unread_count' adalah null, anggap sebagai 0.
+      buyerUnreadCount: (map['buyer_unread_count'] as num?)?.toInt() ?? 0,
+      sellerUnreadCount: (map['seller_unread_count'] as num?)?.toInt() ?? 0,
     );
   }
+  final String id;
+  final String productId;
+  final String buyerId;
+  final String sellerId;
+  final DateTime createdAt;
+  final String? lastMessage;
+  final DateTime? lastMessageAt;
+  final String productName;
+  final String? productImageUrl;
+  final String buyerName;
+  final String sellerName;
+  final int buyerUnreadCount;
+  final int sellerUnreadCount;
 }

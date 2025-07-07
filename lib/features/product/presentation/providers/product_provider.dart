@@ -61,7 +61,7 @@ class ProductActionNotifier extends StateNotifier<AsyncValue<void>> {
       final imageUrl = await _repository.uploadProductImage(
         imageBytes: imageBytes,
         fileName: fileName,
-        productId: productId
+        productId: productId,
       );
 
       data['id'] = productId;
