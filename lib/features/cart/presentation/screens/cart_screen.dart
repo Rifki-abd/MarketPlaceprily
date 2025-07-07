@@ -18,16 +18,6 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // Tombol kembali ini akan memanggil context.pop()
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Kita cek dulu apakah bisa kembali sebelum memanggil pop
-            if (context.canPop()) {
-              context.pop();
-            }
-          },
-        ),
         title: const Text('Keranjang Saya'),
         actions: [
           if (cartItems.isNotEmpty)
@@ -103,9 +93,8 @@ class CartScreen extends ConsumerWidget {
             ],
           ),
           ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Implement checkout logic
-            },
+            // --- PERBAIKAN DI SINI ---
+            onPressed: () => context.push('/checkout'),
             icon: const Icon(Icons.payment),
             label: const Text('Checkout'),
             style: ElevatedButton.styleFrom(

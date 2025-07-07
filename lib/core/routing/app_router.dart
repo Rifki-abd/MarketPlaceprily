@@ -6,13 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:preloft_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:preloft_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:preloft_app/features/auth/presentation/screens/forgot_password_screen.dart'; // Import baru
+import 'package:preloft_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:preloft_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:preloft_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:preloft_app/features/auth/presentation/screens/registration_success_screen.dart';
 import 'package:preloft_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:preloft_app/features/chat/presentation/screens/chat_list_screen.dart';
 import 'package:preloft_app/features/chat/presentation/screens/chat_screen.dart';
+import 'package:preloft_app/features/checkout/presentation/screens/checkout_screen.dart'; // Import baru
+import 'package:preloft_app/features/checkout/presentation/screens/order_success_screen.dart'; // Import baru
 import 'package:preloft_app/features/common/presentation/screens/splash_screen.dart';
 import 'package:preloft_app/features/product/presentation/screens/add_product_screen.dart';
 import 'package:preloft_app/features/product/presentation/screens/edit_product_screen.dart';
@@ -27,7 +29,6 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
   }
   late final StreamSubscription<dynamic> _subscription;
-
   @override
   void dispose() {
     _subscription.cancel();
@@ -37,7 +38,6 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
-
   return GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: true,
@@ -52,11 +52,10 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final onAuthRoute = state.matchedLocation == '/login' ||
                           state.matchedLocation == '/register' ||
-                          state.matchedLocation == '/forgot-password'; // Tambahkan forgot-password
+                          state.matchedLocation == '/forgot-password';
       
       if (isLoggedIn && onAuthRoute) return '/home';
       
-      // Izinkan akses ke halaman sukses register/reset
       final allowedPublicRoutes = ['/register-success'];
       if (!isLoggedIn && !onAuthRoute && !allowedPublicRoutes.contains(state.matchedLocation)) {
         return '/login';
@@ -68,12 +67,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
-      GoRoute(path: '/forgot-password', builder: (context, state) => const ForgotPasswordScreen()), // Rute baru
+      GoRoute(path: '/forgot-password', builder: (context, state) => const ForgotPasswordScreen()),
       GoRoute(
         path: '/register-success',
         builder: (context, state) => RegistrationSuccessScreen(
           email: state.uri.queryParameters['email'] ?? 'email Anda',
-          isReset: state.uri.queryParameters['isReset'] == 'true', // Cek parameter baru
+          isReset: state.uri.queryParameters['isReset'] == 'true',
         ),
       ),
       GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
@@ -83,6 +82,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/admin', builder: (context, state) => const AdminDashboardScreen()),
       GoRoute(path: '/cart', builder: (context, state) => const CartScreen()),
       GoRoute(path: '/chats', builder: (context, state) => const ChatListScreen()),
+      // --- RUTE BARU UNTUK CHECKOUT ---
+      GoRoute(path: '/checkout', builder: (context, state) => const CheckoutScreen()),
+      GoRoute(
+        path: '/order-success/:id',
+        builder: (context, state) => OrderSuccessScreen(orderId: state.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/product/:id', 
         builder: (context, state) => ProductDetailScreen(productId: state.pathParameters['id']!),
